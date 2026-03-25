@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SEUNG RI 2026 - PORTAL ĐĂNG KÝ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .card { background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        input, select, textarea { border: 2px solid #e2e8f0 !important; border-radius: 12px !important; padding: 10px 15px !important; outline: none !important; width: 100%; font-weight: 600; transition: all 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: #2563eb !important; background: white !important; }
+        .smart-list-container { border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white; display: flex; }
+        .line-numbers { background: #f8fafc; color: #94a3b8; text-align: right; padding: 12px 8px; font-family: monospace; font-size: 13px; line-height: 1.6rem; user-select: none; border-right: 1px solid #e2e8f0; min-width: 40px; }
+        #bulkInput { border: none !important; border-radius: 0 !important; font-size: 13px; line-height: 1.6rem; resize: none; min-height: 400px; }
+        .btn-pro { background: #1e293b; color: white; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
+        .btn-pro:hover { background: #000; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+
+<div class="max-w-7xl mx-auto p-4 md:p-8">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white p-6 rounded-3xl shadow-sm border-b-4 border-blue-600">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-600 p-3 rounded-2xl rotate-3 shadow-lg shadow-blue-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black text-slate-900 uppercase italic leading-none">SEUNG RI <span class="text-blue-600">REGISTER</span></h1>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[2px] mt-1">CỔNG ĐĂNG KÝ TRỰC TUYẾN / ONLINE REGISTRATION</p>
+            </div>
+        </div>
+        <div id="status" class="text-[10px] font-black uppercase text-slate-500 flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span> Offline
+        </div>
+    </header>
+
+    <div class="grid lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-4 space-y-6">
+            <div class="card p-6">
+                <h2 class="text-lg font-black text-slate-800 uppercase mb-5 border-b pb-2 italic">
+                    THÔNG TIN ĐĂNG KÝ / REGISTRATION
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase block mb-1">Tên Đơn vị / Club Name</label>
+                        <input type="text" id="clubName" placeholder="Ví dụ: CLB Taekwondo Đà Nẵng">
+                    </div>
+                    
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase block mb-1">Nội dung / Category</label>
+                        <select id="mainType" onchange="updateSubTypes()">
+                            <option value="Kyorugi">Đối kháng / Kyorugi</option>
+                            <option value="Poomsae">Quyền / Poomsae</option>
+                            <option value="Speed">Tốc độ / Speed</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase block mb-1">Hạng cân - Lứa tuổi / Class</label>
+                        <select id="subType"></select>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase block mb-1">Danh sách VĐV / Athletes List</label>
+                        <p class="text-[9px] text-blue-500 mb-2 italic">* Chỉ nhập Tên VĐV, mỗi người 1 dòng</p>
+                        <div class="smart-list-container">
+                            <div id="lineNumbers" class="line-numbers">1</div>
+                            <textarea id="bulkInput" oninput="updateSTT()" placeholder="Nguyễn Văn A&#10;Trần Thị B..."></textarea>
+                        </div>
+                    </div>
+
+                    <button onclick="submitData()" class="w-full py-4 rounded-2xl btn-pro shadow-xl text-xs">
+                        GỬI ĐĂNG KÝ / SUBMIT DATA
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8">
+            <div class="card p-6 min-h-screen">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-lg font-black text-slate-800 uppercase italic">DANH SÁCH ĐÃ ĐĂNG KÝ <span id="totalCount" class="text-blue-600">(0)</span></h2>
+                    <input type="text" id="searchBox" oninput="renderTable()" placeholder="Tìm theo tên đơn vị..." class="!w-full md:!w-64 !py-2 !text-xs">
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase">
+                                <th class="p-4 border-b w-12 text-center">STT</th>
+                                <th class="p-4 border-b">VĐV / Athlete</th>
+                                <th class="p-4 border-b">Đơn vị / Club</th>
+                                <th class="p-4 border-b">Nội dung / Class</th>
+                                <th class="p-4 border-b text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTable" class="text-sm font-bold text-slate-700">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- CẤU HÌNH FIREBASE ---
+const firebaseConfig = {
+    apiKey: "AIzaSyC00bfXhy9CaF7xVbVqTtcfJqDQfGBechw",
+    authDomain: "seungrichampionship-d3985.firebaseapp.com",
+    databaseURL: "https://seungrichampionship-d3985-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    projectId: "seungrichampionship-d3985",
+    storageBucket: "seungrichampionship-d3985.firebasestorage.app",
+    messagingSenderId: "696543159443",
+    appId: "1:696543159443:web:59f4c558600929f4ee1966"
+};
+
+// DỮ LIỆU ĐIỀU LỆ 2026
+const CLASSES = {
+    Kyorugi: [
+        "Nam Dưới 11: -21kg", "Nam Dưới 11: -24kg", "Nam Dưới 11: -27kg", "Nam Dưới 11: -30kg", "Nam Dưới 11: -33kg", "Nam Dưới 11: -36kg", "Nam Dưới 11: -39kg", "Nam Dưới 11: -42kg", "Nam Dưới 11: -45kg", "Nam Dưới 11: +45kg",
+        "Nữ Dưới 11: -21kg", "Nữ Dưới 11: -24kg", "Nữ Dưới 11: -27kg", "Nữ Dưới 11: -30kg", "Nữ Dưới 11: -33kg", "Nữ Dưới 11: -36kg", "Nữ Dưới 11: -39kg", "Nữ Dưới 11: -42kg", "Nữ Dưới 11: -45kg", "Nữ Dưới 11: +45kg",
+        "Nam 12-14: -33kg", "Nam 12-14: -37kg", "Nam 12-14: -41kg", "Nam 12-14: -45kg", "Nam 12-14: -49kg", "Nam 12-14: -53kg", "Nam 12-14: -57kg", "Nam 12-14: -61kg", "Nam 12-14: -65kg", "Nam 12-14: +65kg",
+        "Nữ 12-14: -29kg", "Nữ 12-14: -33kg", "Nữ 12-14: -37kg", "Nữ 12-14: -41kg", "Nữ 12-14: -44kg", "Nữ 12-14: -47kg", "Nữ 12-14: -51kg", "Nữ 12-14: -55kg", "Nữ 12-14: -59kg", "Nữ 12-14: +59kg"
+    ],
+    Poomsae: ["Cá nhân Nam Dưới 11", "Cá nhân Nữ Dưới 11", "Cá nhân Nam 12-14", "Cá nhân Nữ 12-14", "Cá nhân Nam 15-17", "Cá nhân Nữ 15-17", "Cá nhân Nam Trên 17", "Cá nhân Nữ Trên 17"],
+    Speed: ["Speed Nam Dưới 11", "Speed Nữ Dưới 11", "Speed Nam 12-14", "Speed Nữ 12-14", "Speed Nam 15-17", "Speed Nữ 15-17"]
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database().ref("seungri_2026_master_list");
+
+let allData = [];
+
+// Khởi tạo STT tự động
+function updateSTT() {
+    const lines = document.getElementById('bulkInput').value.split('\n');
+    document.getElementById('lineNumbers').innerHTML = Array.from({length: Math.max(lines.length, 1)}, (_, i) => i + 1).join('<br>');
+}
+
+function updateSubTypes() {
+    const main = document.getElementById('mainType').value;
+    document.getElementById('subType').innerHTML = CLASSES[main].map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+// Lấy dữ liệu thời gian thực
+db.on('value', (snapshot) => {
+    const val = snapshot.val();
+    allData = val ? Object.values(val) : [];
+    document.getElementById('status').innerHTML = '<span class="w-2 h-2 bg-green-500 rounded-full"></span> Trực tuyến / Online';
+    document.getElementById('status').className = "text-green-600 font-black text-[10px] uppercase flex items-center gap-2";
+    renderTable();
+});
+
+async function submitData() {
+    const club = document.getElementById('clubName').value.trim();
+    const rawNames = document.getElementById('bulkInput').value.split('\n').filter(n => n.trim());
+    const mainType = document.getElementById('mainType').value;
+    const subType = document.getElementById('subType').value;
+
+    if(!club || rawNames.length === 0) return alert("Vui lòng nhập Tên Đơn vị và Danh sách VĐV!");
+
+    for(let name of rawNames) {
+        await db.push({
+            name: name.trim(),
+            club: club,
+            category: mainType,
+            class: subType,
+            time: new Date().getTime()
+        });
+    }
+
+    document.getElementById('bulkInput').value = "";
+    updateSTT();
+    alert("Đã gửi đăng ký cho " + rawNames.length + " vận động viên!");
+}
+
+function renderTable() {
+    const search = document.getElementById('searchBox').value.toLowerCase();
+    const table = document.getElementById('dataTable');
+    const filtered = allData.filter(d => d.club.toLowerCase().includes(search));
+    
+    document.getElementById('totalCount').innerText = `(${filtered.length})`;
+    
+    table.innerHTML = filtered.slice().reverse().map((d, i) => `
+        <tr class="hover:bg-blue-50 transition border-b border-slate-50">
+            <td class="p-4 text-center text-slate-400 text-xs">${filtered.length - i}</td>
+            <td class="p-4 uppercase font-black text-slate-900">${d.name}</td>
+            <td class="p-4 text-blue-600 uppercase text-xs">${d.club}</td>
+            <td class="p-4 text-slate-500 text-xs">${d.category} - ${d.class}</td>
+            <td class="p-4 text-center"><span class="bg-green-100 text-green-600 px-2 py-1 rounded text-[9px] font-black uppercase">Received</span></td>
+        </tr>
+    `).join('');
+}
+
+// Chạy lần đầu
+updateSubTypes();
+updateSTT();
+</script>
+</body>
+</html>
