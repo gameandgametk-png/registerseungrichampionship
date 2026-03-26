@@ -3,31 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SEUNG RI 2026 - Portal Đơn Vị</title>
+    <title>SEUNG RI 2026 - Club Portal Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
-        .card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; }
-        input, select, textarea { border: 2px solid #e2e8f0 !important; border-radius: 10px !important; padding: 8px 12px !important; outline: none !important; font-weight: 600; font-size: 13px; }
+        .card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        input, select, textarea { border: 2px solid #e2e8f0 !important; border-radius: 12px !important; padding: 10px 15px !important; outline: none !important; font-weight: 600; font-size: 13px; }
         input:focus, select:focus { border-color: #2563eb !important; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
         .nav-active { background: #2563eb !important; color: white !important; shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
-        .table-input select { width: 100%; min-width: 150px; border: none !important; background: transparent !important; }
-        .table-input tr:hover { background-color: #f8fafc; }
+        .btn-pro { transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-pro:hover { transform: translateY(-1px); filter: brightness(1.1); }
     </style>
 </head>
 <body>
 
 <div class="max-w-7xl mx-auto p-4 md:p-6">
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center">
-            <h2 class="text-2xl font-black text-slate-900 uppercase italic mb-6">Email Login</h2>
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-slate-100">
+            <div class="bg-blue-600 w-16 h-16 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 uppercase italic">Club Login</h2>
+            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1 mb-6">Đăng nhập cổng Đơn vị</p>
             <div class="space-y-4 text-left">
-                <input type="email" id="loginEmail" placeholder="Email của bạn" class="w-full">
-                <input type="password" id="loginPass" placeholder="Mật khẩu" class="w-full">
-                <button onclick="handleAccess()" id="accessBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase shadow-xl hover:bg-black transition-all">Vào hệ thống</button>
+                <input type="email" id="loginEmail" placeholder="Email / Thư điện tử" class="w-full">
+                <input type="password" id="loginPass" placeholder="Password / Mật khẩu" class="w-full">
+                <button onclick="handleAccess()" id="accessBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase shadow-xl btn-pro">Truy cập / Access</button>
             </div>
         </div>
     </div>
@@ -36,48 +41,110 @@
         <div class="flex items-center gap-4">
             <h1 class="text-2xl font-black text-slate-900 uppercase italic">SEUNG RI <span class="text-blue-600">LIVE</span></h1>
             <div id="emailTag" class="bg-blue-100 text-blue-600 px-4 py-1.5 rounded-full font-black text-[10px]">---</div>
+            <button onclick="logout()" class="bg-red-50 text-red-500 p-2 rounded-xl hover:bg-red-500 hover:text-white transition shadow-sm" title="Đăng xuất">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
         </div>
         <nav class="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner">
-            <button onclick="switchTab('reg')" id="btn-reg" class="tab-btn nav-active px-8 py-3 rounded-xl transition-all font-black text-[10px] uppercase">1. Nhập VĐV Hàng loạt</button>
-            <button onclick="switchTab('view')" id="btn-view" class="tab-btn px-8 py-3 rounded-xl transition-all text-slate-400 font-black text-[10px] uppercase ml-2">2. Danh sách & Kết quả</button>
+            <button onclick="switchTab('reg')" id="btn-reg" class="tab-btn nav-active px-6 py-2.5 rounded-xl font-black text-[10px] uppercase transition">1. Nhập VĐV / Registration</button>
+            <button onclick="switchTab('view')" id="btn-view" class="tab-btn px-6 py-2.5 rounded-xl font-black text-[10px] uppercase transition text-slate-400 ml-2">2. Danh sách & Kết quả / Results</button>
         </nav>
     </header>
 
     <div id="section-reg" class="hidden space-y-6">
-        <div class="card p-6 border-l-[10px] border-blue-600">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-black uppercase italic text-slate-800">Bước 1: Dán tên danh sách VĐV</h2>
-                <input type="text" id="vdvClub" placeholder="Tên Đơn vị (Hiện trên sơ đồ)" class="w-64">
+        <div class="card p-8 border-l-[10px] border-blue-600">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+                <div class="w-full">
+                    <h2 class="text-lg font-black uppercase italic text-slate-800 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        BƯỚC 1: NHẬP DANH SÁCH / STEP 1: IMPORT NAMES
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Tên Đơn vị / Club Name</label>
+                            <input type="text" id="vdvClub" placeholder="VD: CLB Seung Ri" class="w-full">
+                        </div>
+                    </div>
+                    <textarea id="quickPaste" rows="4" class="w-full" placeholder="Dán danh sách tên từ Excel vào đây... / Paste list of names here..."></textarea>
+                </div>
             </div>
-            <textarea id="quickPaste" rows="5" class="w-full mb-4" placeholder="Copy danh sách tên từ Excel rồi dán vào đây..."></textarea>
-            <button onclick="processList()" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-black text-xs uppercase hover:bg-blue-600 transition-all">Phân tích danh sách</button>
+            <button onclick="processList()" class="bg-slate-800 text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase btn-pro">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Nhập Danh Sách / Import List
+            </button>
         </div>
 
-        <div id="step2" class="hidden card p-6 overflow-x-auto">
-            <h2 class="text-lg font-black uppercase italic text-slate-800 mb-4">Bước 2: Chọn nội dung cho từng người</h2>
-            <table class="w-full table-input">
+        <div id="step2" class="hidden card p-8 overflow-x-auto border-t-[10px] border-amber-500">
+            <h2 class="text-lg font-black uppercase italic text-slate-800 mb-6 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                BƯỚC 2: CHỌN NỘI DUNG / STEP 2: ASSIGN CATEGORIES
+            </h2>
+            <table class="w-full mb-6">
                 <thead>
-                    <tr class="text-left text-[10px] uppercase text-slate-400 font-black">
-                        <th class="p-2">STT</th>
-                        <th class="p-2">Họ và Tên</th>
-                        <th class="p-2">Nội dung</th>
-                        <th class="p-2">Hạng cân / Lứa tuổi</th>
-                        <th class="p-2">Thao tác</th>
+                    <tr class="text-left text-[10px] uppercase text-slate-400 font-black border-b border-slate-100">
+                        <th class="p-3">STT</th>
+                        <th class="p-3">Họ và Tên / Name</th>
+                        <th class="p-3">Nội dung / Category</th>
+                        <th class="p-3">Hạng cân - Tuổi / Class</th>
+                        <th class="p-3 text-center">Xóa</th>
                     </tr>
                 </thead>
-                <tbody id="tempVdvBody"></tbody>
+                <tbody id="tempVdvBody" class="divide-y divide-slate-50"></tbody>
             </table>
-            <div class="mt-6 flex gap-4">
-                <button onclick="saveAllTemp()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase shadow-xl hover:bg-black transition-all">Lưu tất cả VĐV vào hệ thống</button>
-                <button onclick="resetTemp()" class="text-slate-400 font-bold text-xs uppercase underline">Xóa làm lại</button>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="saveAllTemp()" id="finalSaveBtn" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-sm uppercase shadow-xl btn-pro">
+                    Lưu tất cả / Save All Athletes
+                </button>
+                <button onclick="resetTemp()" class="text-slate-400 font-bold text-xs uppercase underline">Xóa làm lại / Clear</button>
             </div>
         </div>
     </div>
 
-    <div id="section-view" class="hidden">
-        <div class="card p-6 min-h-screen">
-            <h2 class="text-xl font-black text-slate-800 uppercase mb-6 italic">VĐV của tôi</h2>
-            <div id="myAthletes" class="space-y-3"></div>
+    <div id="section-view" class="hidden space-y-6">
+        <div class="card p-8 min-h-screen">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b pb-6">
+                <h2 class="text-xl font-black text-slate-800 uppercase italic flex items-center gap-3">
+                    <div class="bg-blue-600 w-8 h-8 rounded-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                    </div>
+                    DANH SÁCH VĐV ĐƠN VỊ / ATHLETES LIST
+                </h2>
+                <button onclick="exportToExcel()" class="bg-green-600 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg btn-pro">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    XUẤT FILE EXCEL / DOWNLOAD EXCEL
+                </button>
+            </div>
+            <div id="myAthletes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+        </div>
+    </div>
+</div>
+
+<div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-[2rem] shadow-2xl max-w-lg w-full">
+        <h2 class="text-xl font-black uppercase italic text-slate-800 mb-6">Chỉnh sửa thông tin / Edit info</h2>
+        <input type="hidden" id="modalKey">
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Họ tên / Name</label>
+                <input type="text" id="modalName" class="w-full">
+            </div>
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Đơn vị / Club</label>
+                <input type="text" id="modalClub" class="w-full">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <select id="modalMain" onchange="updateModalSub()">
+                    <option value="Kyorugi">Đối kháng</option>
+                    <option value="Poomsae">Quyền</option>
+                    <option value="Speed">Tốc độ</option>
+                </select>
+                <select id="modalSub"></select>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="saveModalEdit()" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs btn-pro">Cập nhật / Update</button>
+                <button onclick="closeModal()" class="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black uppercase text-xs">Hủy / Cancel</button>
+            </div>
         </div>
     </div>
 </div>
@@ -85,37 +152,38 @@
 <script>
 // --- CONFIG FIREBASE ---
 const firebaseConfig = {
-  apiKey: "AIzaSyBhN3Riezh-Ka20Salm1COtFbW9UdCLRdM",
-  authDomain: "seungrichampionship-90984.firebaseapp.com",
-  databaseURL: "https://seungrichampionship-90984-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "seungrichampionship-90984",
-  storageBucket: "seungrichampionship-90984.firebasestorage.app",
-  messagingSenderId: "1031691130771",
-  appId: "1:1031691130771:web:1dc2ade7290b60f9d87a66",
-  measurementId: "G-QC40451RRY"
+    apiKey: "AIzaSyC00bfXhy9CaF7xVbVqTtcfJqDQfGBechw",
+    authDomain: "seungrichampionship-d3985.firebaseapp.com",
+    databaseURL: "https://seungrichampionship-d3985-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    projectId: "seungrichampionship-d3985",
+    storageBucket: "seungrichampionship-d3985.firebasestorage.app",
+    messagingSenderId: "696543159443",
+    appId: "1:696543159443:web:59f4c558600929f4ee1966"
 };
 
 const CLASSES = {
-    Kyorugi: ["Nam Dưới 11: -21kg", "Nam Dưới 11: -24kg", "Nam Dưới 11: -27kg", "Nam Dưới 11: -30kg", "Nữ Dưới 11: -21kg", "Nam 12-14: -33kg"],
+    Kyorugi: ["Nam Dưới 11: -21kg", "Nam Dưới 11: -24kg", "Nam Dưới 11: -27kg", "Nam Dưới 11: -30kg", "Nam Dưới 11: -33kg", "Nữ Dưới 11: -21kg", "Nữ Dưới 11: -24kg", "Nam 12-14: -33kg", "Nam 12-14: -37kg"],
     Poomsae: ["Cá nhân Nam Dưới 11", "Cá nhân Nữ Dưới 11", "Cá nhân Nam 12-14", "Cá nhân Nữ 12-14"],
-    Speed: ["Nam Dưới 11", "Nữ Dưới 11"]
+    Speed: ["Nam Dưới 11", "Nữ Dưới 11", "Nam 12-14", "Nữ 12-14"]
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 let currentUserEmail = "";
 let tempVdvList = [];
+let myFullList = [];
 
-// Đăng nhập
+// 1. Đăng nhập & Đăng xuất
 function handleAccess() {
     let email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const pass = document.getElementById('loginPass').value.trim();
-    if(!email || !pass) return alert("Nhập Email và Pass");
+    if(!email || !pass) return alert("Vui lòng nhập Email và Mật khẩu!");
     const emailKey = email.replace(/\./g, ',');
-    db.ref('users_v2/' + emailKey).once('value', snap => {
+    db.ref('users_v3/' + emailKey).once('value', snap => {
         if(snap.exists() && snap.val().pass === pass) enterPortal(email);
-        else if(!snap.exists() && confirm("Đăng ký mới?")) db.ref('users_v2/' + emailKey).set({pass, createdAt: Date.now()}).then(() => enterPortal(email));
-        else alert("Sai pass");
+        else if(!snap.exists() && confirm("Email chưa có, đăng ký mới?")) {
+            db.ref('users_v3/' + emailKey).set({pass, createdAt: Date.now()}).then(() => enterPortal(email));
+        } else alert("Sai mật khẩu!");
     });
 }
 
@@ -125,74 +193,76 @@ function enterPortal(email) {
     document.getElementById('mainHeader').classList.remove('hidden');
     document.getElementById('section-reg').classList.remove('hidden');
     document.getElementById('emailTag').innerText = email;
-    db.ref('last_club_name/' + email.replace(/\./g, ',')).once('value', s => { if(s.exists()) document.getElementById('vdvClub').value = s.val(); });
+    db.ref('last_club_v3/' + email.replace(/\./g, ',')).once('value', s => { 
+        if(s.exists()) document.getElementById('vdvClub').value = s.val(); 
+    });
     loadMyAthletes();
 }
 
-// XỬ LÝ NHẬP HÀNG LOẠT
+function logout() { location.reload(); }
+
+// 2. Nhập danh sách
 function processList() {
     const raw = document.getElementById('quickPaste').value.split('\n').filter(n => n.trim());
-    if(raw.length === 0) return alert("Dán danh sách tên trước!");
-    
+    if(raw.length === 0) return alert("Dán danh sách tên VĐV trước!");
     tempVdvList = raw.map(name => ({ name: name.trim().toUpperCase(), category: 'Kyorugi', subType: CLASSES.Kyorugi[0] }));
     renderTempTable();
     document.getElementById('step2').classList.remove('hidden');
+    window.scrollTo({ top: document.getElementById('step2').offsetTop, behavior: 'smooth' });
 }
 
 function renderTempTable() {
     const body = document.getElementById('tempVdvBody');
     body.innerHTML = tempVdvList.map((vdv, index) => `
-        <tr class="border-b border-slate-100">
-            <td class="p-2 text-slate-400 text-xs font-bold">${index + 1}</td>
-            <td class="p-2 font-black text-slate-800">${vdv.name}</td>
-            <td class="p-2">
-                <select onchange="updateTempCat(${index}, 'category', this.value)">
+        <tr>
+            <td class="p-3 text-slate-400 font-bold">${index + 1}</td>
+            <td class="p-3 font-black text-slate-800 uppercase">${vdv.name}</td>
+            <td class="p-3">
+                <select onchange="updateTemp(${index}, 'category', this.value)" class="w-full">
                     <option value="Kyorugi" ${vdv.category==='Kyorugi'?'selected':''}>Đối kháng</option>
                     <option value="Poomsae" ${vdv.category==='Poomsae'?'selected':''}>Quyền</option>
                     <option value="Speed" ${vdv.category==='Speed'?'selected':''}>Tốc độ</option>
                 </select>
             </td>
-            <td class="p-2">
-                <select id="subSelect-${index}" onchange="updateTempCat(${index}, 'subType', this.value)">
+            <td class="p-3">
+                <select onchange="updateTemp(${index}, 'subType', this.value)" class="w-full">
                     ${CLASSES[vdv.category].map(c => `<option value="${c}" ${vdv.subType===c?'selected':''}>${c}</option>`).join('')}
                 </select>
             </td>
-            <td class="p-2 text-center">
-                <button onclick="removeTemp(${index})" class="text-red-400">✕</button>
-            </td>
+            <td class="p-3 text-center"><button onclick="removeTemp(${index})" class="text-red-400 hover:text-red-600 font-bold">✕</button></td>
         </tr>
     `).join('');
 }
 
-function updateTempCat(index, field, value) {
-    tempVdvList[index][field] = value;
+function updateTemp(idx, field, val) {
+    tempVdvList[idx][field] = val;
     if(field === 'category') {
-        tempVdvList[index].subType = CLASSES[value][0];
-        renderTempTable(); // Cập nhật lại dropdown hạng cân tương ứng
+        tempVdvList[idx].subType = CLASSES[val][0];
+        renderTempTable();
     }
 }
 
-function removeTemp(index) {
-    tempVdvList.splice(index, 1);
-    renderTempTable();
-}
+function removeTemp(idx) { tempVdvList.splice(idx, 1); renderTempTable(); }
 
 async function saveAllTemp() {
     const club = document.getElementById('vdvClub').value.trim();
-    if(!club) return alert("Nhập tên Đơn vị!");
-    
-    const btn = event.target;
-    btn.disabled = true; btn.innerText = "ĐANG LƯU...";
+    if(!club) return alert("Nhập tên Đơn vị trước!");
+    const btn = document.getElementById('finalSaveBtn');
+    btn.disabled = true; btn.innerText = "SAVING / ĐANG LƯU...";
 
-    for(let vdv of tempVdvList) {
-        await db.ref('registrations_2026').push({
-            ...vdv, club, ownerEmail: currentUserEmail, isLocked: false
-        });
+    try {
+        const promises = tempVdvList.map(vdv => db.ref('registrations_v3').push({
+            ...vdv, club, ownerEmail: currentUserEmail, isLocked: false, time: Date.now()
+        }));
+        await Promise.all(promises);
+        db.ref('last_club_v3/' + currentUserEmail.replace(/\./g, ',')).set(club);
+        alert(`Đã lưu ${tempVdvList.length} VĐV thành công!`);
+        resetTemp();
+    } catch (e) { alert("Lỗi kết nối máy chủ!"); }
+    finally { 
+        btn.disabled = false; 
+        btn.innerHTML = "Lưu tất cả / Save All Athletes"; 
     }
-
-    db.ref('last_club_name/' + currentUserEmail.replace(/\./g, ',')).set(club);
-    alert(`Đã lưu thành công ${tempVdvList.length} VĐV!`);
-    resetTemp();
 }
 
 function resetTemp() {
@@ -201,37 +271,103 @@ function resetTemp() {
     document.getElementById('step2').classList.add('hidden');
 }
 
+// 3. Quản lý Danh sách (Tab 2)
 function loadMyAthletes() {
-    db.ref('registrations_2026').on('value', snap => {
+    db.ref('registrations_v3').on('value', snap => {
         const container = document.getElementById('myAthletes');
         container.innerHTML = "";
         const data = snap.val();
+        myFullList = [];
         if(!data) return;
+
         Object.keys(data).forEach(key => {
             const r = data[key];
             if(r.ownerEmail === currentUserEmail) {
+                myFullList.push(r);
                 container.innerHTML += `
-                    <div class="p-4 bg-white border border-slate-100 rounded-2xl flex justify-between shadow-sm">
-                        <div>
-                            <div class="font-black text-slate-900 uppercase text-sm">${r.name}</div>
-                            <div class="text-blue-600 font-bold text-[9px] uppercase">${r.club}</div>
-                            <div class="text-slate-400 text-[9px] uppercase mt-1">${r.category} - ${r.subType}</div>
+                    <div class="p-5 bg-slate-50 border border-slate-100 rounded-3xl flex justify-between items-center shadow-sm hover:bg-white transition-all group">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shadow-md">
+                                VĐV
+                            </div>
+                            <div>
+                                <div class="font-black text-slate-900 uppercase text-sm">${r.name}</div>
+                                <div class="text-blue-600 font-bold text-[9px] uppercase tracking-wider">${r.club}</div>
+                                <div class="text-slate-400 font-bold text-[9px] uppercase mt-1"># ${r.category} - ${r.subType}</div>
+                            </div>
                         </div>
-                        <button onclick="deleteVdv('${key}')" class="text-red-500 font-bold text-xs p-2">XÓA</button>
+                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                            ${r.isLocked ? 
+                                '<span class="text-[9px] font-black text-red-500 bg-red-50 px-3 py-1.5 rounded-xl">LOCKED</span>' : 
+                                `<button onclick="openEditModal('${key}')" class="bg-amber-100 text-amber-600 p-2.5 rounded-xl hover:bg-amber-500 hover:text-white transition"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+                                 <button onclick="deleteVdv('${key}')" class="bg-red-100 text-red-500 p-2.5 rounded-xl hover:bg-red-500 hover:text-white transition"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`
+                            }
+                        </div>
                     </div>`;
             }
         });
     });
 }
 
-function deleteVdv(key) { if(confirm("Xóa?")) db.ref('registrations_2026/' + key).remove(); }
+function openEditModal(key) {
+    db.ref('registrations_v3/' + key).once('value', s => {
+        const v = s.val();
+        document.getElementById('modalKey').value = key;
+        document.getElementById('modalName').value = v.name;
+        document.getElementById('modalClub').value = v.club;
+        document.getElementById('modalMain').value = v.category;
+        updateModalSub();
+        document.getElementById('modalSub').value = v.subType;
+        document.getElementById('editModal').classList.remove('hidden');
+    });
+}
+
+function updateModalSub() {
+    const main = document.getElementById('modalMain').value;
+    document.getElementById('modalSub').innerHTML = CLASSES[main].map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+async function saveModalEdit() {
+    const key = document.getElementById('modalKey').value;
+    const data = {
+        name: document.getElementById('modalName').value.trim().toUpperCase(),
+        club: document.getElementById('modalClub').value.trim(),
+        category: document.getElementById('modalMain').value,
+        subType: document.getElementById('modalSub').value
+    };
+    await db.ref('registrations_v3/' + key).update(data);
+    alert("Cập nhật thành công!");
+    closeModal();
+}
+
+function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
+function deleteVdv(key) { if(confirm("Xóa VĐV này khỏi hệ thống?")) db.ref('registrations_v3/' + key).remove(); }
+
+// 4. Xuất Excel
+function exportToExcel() {
+    if(myFullList.length === 0) return alert("Chưa có danh sách để xuất!");
+    const data = myFullList.map((r, i) => ({
+        "STT": i + 1,
+        "Họ và Tên": r.name,
+        "Đơn vị": r.club,
+        "Nội dung": r.category,
+        "Hạng cân/Tuổi": r.subType
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachVDV");
+    XLSX.writeFile(workbook, `SEUNGRI_2026_${document.getElementById('vdvClub').value || 'Doi_Thi_Dau'}.xlsx`);
+}
 
 function switchTab(tab) {
     document.getElementById('section-reg').classList.toggle('hidden', tab !== 'reg');
     document.getElementById('section-view').classList.toggle('hidden', tab !== 'view');
-    document.getElementById('btn-reg').className = `tab-btn flex-1 px-8 py-3 rounded-xl transition-all font-black text-[10px] uppercase ${tab==='reg'?'nav-active':'text-slate-400'}`;
-    document.getElementById('btn-view').className = `tab-btn flex-1 px-8 py-3 rounded-xl transition-all font-black text-[10px] uppercase ${tab==='view'?'nav-active':'text-slate-400'}`;
+    document.querySelectorAll('.tab-btn').forEach(b => b.className = "tab-btn px-6 py-2.5 rounded-xl font-black text-[10px] uppercase transition text-slate-400 ml-2");
+    document.getElementById('btn-' + tab).className = "tab-btn nav-active px-6 py-2.5 rounded-xl font-black text-[10px] uppercase transition";
 }
+
+// Khởi tạo
+document.getElementById('section-reg').classList.remove('hidden');
 </script>
 </body>
 </html>
