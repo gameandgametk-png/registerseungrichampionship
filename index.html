@@ -3,58 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SEUNG RI 2026 - Cổng Đăng Ký Đơn Vị</title>
+    <title>SEUNG RI 2026 - Portal Đơn Vị</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
-        .card { background: white; border-radius: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        input, select, textarea { border: 2px solid #e2e8f0 !important; border-radius: 14px !important; padding: 12px 16px !important; outline: none !important; width: 100%; font-weight: 600; transition: all 0.2s; }
-        input:focus, select:focus, textarea:focus { border-color: #2563eb !important; background: white !important; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
-        
-        /* Smart STT Style */
-        .smart-list-container { border: 2px solid #e2e8f0; border-radius: 14px; overflow: hidden; background: white; display: flex; }
-        .line-numbers { background: #f8fafc; color: #94a3b8; text-align: right; padding: 14px 10px; font-family: monospace; font-size: 13px; line-height: 1.6rem; user-select: none; border-right: 2px solid #f1f5f9; min-width: 45px; }
-        #namesInput { border: none !important; border-radius: 0 !important; font-size: 14px; line-height: 1.6rem; resize: none; min-height: 350px; padding: 14px !important; }
-        
+        .card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; }
+        input, select { border: 2px solid #e2e8f0 !important; border-radius: 14px !important; padding: 12px 16px !important; outline: none !important; width: 100%; font-weight: 600; }
+        input:focus, select:focus { border-color: #2563eb !important; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
         .nav-active { background: #2563eb !important; color: white !important; shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
-        .tab-btn { font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        .btn-action { transition: all 0.2s; cursor: pointer; }
+        .btn-action:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
 
 <div class="max-w-7xl mx-auto p-4 md:p-6">
-    <header class="flex flex-col lg:flex-row justify-between items-center mb-8 gap-6 bg-white p-6 rounded-[2rem] shadow-sm">
-        <div class="flex items-center gap-4">
-            <div class="bg-blue-600 p-3.5 rounded-2xl rotate-3 shadow-xl">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full">
+            <div class="text-center mb-8">
+                <div class="bg-blue-600 w-16 h-16 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900 uppercase italic">Club Access</h2>
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Đăng nhập hoặc Đăng ký Đơn vị</p>
             </div>
-            <div>
-                <h1 class="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">SEUNG RI <span class="text-blue-600">REGISTER</span></h1>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] mt-1">Cổng đăng ký dành cho đơn vị / Club Portal</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Tên Đơn vị / Club Name</label>
+                    <input type="text" id="loginClub" placeholder="Nhập tên chính xác của Đơn vị">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Mã bảo mật / Password</label>
+                    <input type="password" id="loginCode" placeholder="Tự đặt mã nếu đăng ký mới">
+                </div>
+                <button onclick="handleAccess()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase shadow-xl hover:bg-black transition-all">Truy cập hệ thống</button>
+                <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <p class="text-[10px] text-blue-700 leading-relaxed italic text-center">
+                        * Ghi nhớ Mã bảo mật của bạn. Nếu đây là lần đầu, hệ thống sẽ tự khởi tạo tài khoản cho đơn vị với Mã này.
+                    </p>
+                </div>
             </div>
         </div>
-        
+    </div>
+
+    <header class="flex flex-col lg:flex-row justify-between items-center mb-8 gap-6 bg-white p-6 rounded-[2rem] shadow-sm">
+        <div class="flex items-center gap-4">
+            <h1 class="text-2xl font-black text-slate-900 uppercase italic leading-none">SEUNG RI <span class="text-blue-600">LIVE</span></h1>
+            <div id="clubTag" class="bg-blue-100 text-blue-600 px-4 py-1.5 rounded-full font-black text-[10px] uppercase">GUEST</div>
+            <button onclick="location.reload()" class="text-slate-300 hover:text-red-500 transition"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+        </div>
         <nav class="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner w-full lg:w-auto">
-            <button onclick="switchTab('reg')" id="btn-reg" class="tab-btn nav-active flex-1 px-8 py-3 rounded-xl transition-all">1. Đăng ký / Register</button>
-            <button onclick="switchTab('view')" id="btn-view" class="tab-btn flex-1 px-8 py-3 rounded-xl transition-all text-slate-400">2. Xem kết quả / Results</button>
+            <button onclick="switchTab('reg')" id="btn-reg" class="tab-btn nav-active flex-1 px-8 py-3 rounded-xl transition-all font-black text-[10px] uppercase">1. Đăng ký & Sửa</button>
+            <button onclick="switchTab('view')" id="btn-view" class="tab-btn flex-1 px-8 py-3 rounded-xl transition-all text-slate-400 font-black text-[10px] uppercase">2. Xem kết quả</button>
         </nav>
     </header>
 
-    <div id="section-reg" class="grid lg:grid-cols-12 gap-8">
+    <div id="section-reg" class="grid lg:grid-cols-12 gap-8 hidden">
         <div class="lg:col-span-5 space-y-6">
-            <div class="card p-8 border-t-[10px] border-blue-600">
-                <h2 class="text-xl font-black text-slate-800 uppercase mb-6 italic">Thông tin VĐV / Athlete Info</h2>
+            <div class="card p-8 border-t-[10px] border-blue-600 shadow-sm">
+                <h2 id="formTitle" class="text-xl font-black text-slate-800 uppercase mb-6 italic">Đăng ký VĐV</h2>
                 <div class="space-y-5">
+                    <input type="hidden" id="editKey">
                     <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Đơn vị / Club Name</label>
-                        <input type="text" id="clubName" placeholder="Tên CLB/Đơn vị của bạn">
+                        <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Họ và Tên VĐV</label>
+                        <input type="text" id="vdvName" placeholder="NGUYỄN VĂN A">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Nội dung / Category</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Nội dung</label>
                             <select id="mainType" onchange="updateSubTypes()">
                                 <option value="Kyorugi">Đối kháng</option>
                                 <option value="Poomsae">Quyền</option>
@@ -62,77 +82,190 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Hạng cân - Tuổi / Class</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Hạng cân / Nhóm</label>
                             <select id="subType"></select>
                         </div>
                     </div>
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-1">Danh sách tên VĐV (Mỗi người 1 dòng)</label>
-                        <div class="smart-list-container">
-                            <div id="lineNumbers" class="line-numbers">1</div>
-                            <textarea id="namesInput" oninput="handleSTT()" placeholder="Nguyễn Văn A&#10;Trần Thị B..."></textarea>
-                        </div>
-                    </div>
-                    <button onclick="sendReg()" id="sendBtn" class="w-full bg-slate-900 text-white py-5 rounded-[1.2rem] font-black uppercase text-sm shadow-2xl hover:bg-blue-600 transition-all">Gửi đăng ký / Submit Data</button>
+                    <button onclick="saveVdv()" id="saveBtn" class="w-full bg-blue-600 text-white py-5 rounded-[1.2rem] font-black uppercase text-sm shadow-xl hover:bg-black transition-all">Lưu thông tin</button>
+                    <button onclick="resetForm()" id="cancelBtn" class="hidden w-full text-slate-400 font-bold text-xs uppercase underline">Hủy</button>
                 </div>
             </div>
         </div>
 
         <div class="lg:col-span-7">
-            <div class="card p-8 min-h-screen">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-black text-slate-800 uppercase italic">Danh sách đã gửi <span id="regCount" class="text-blue-600">(0)</span></h2>
-                    <div id="statusDB" class="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-red-100 text-red-500">Offline</div>
-                </div>
-                <div id="displayRegs" class="space-y-3">
+            <div class="card p-8 min-h-screen shadow-sm">
+                <h2 class="text-xl font-black text-slate-800 uppercase mb-6 italic tracking-tight">Danh sách đã gửi</h2>
+                <div id="myAthletes" class="space-y-3">
                     </div>
             </div>
         </div>
     </div>
 
-    <div id="section-view" class="hidden card p-8 min-h-[600px] flex items-center justify-center">
-        <div class="text-center">
-            <div class="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div id="section-view" class="hidden card p-8 min-h-[500px]">
+        <h2 class="text-xl font-black text-slate-800 uppercase mb-6 border-b-4 border-blue-600 inline-block">Nội dung giải đấu</h2>
+        <div id="categoryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             </div>
-            <h3 class="text-xl font-black text-slate-800 uppercase">Sơ đồ thi đấu & Kết quả</h3>
-            <p class="text-slate-400 text-sm mt-2 font-medium">Kết quả sẽ được hiển thị sau khi BTC tiến hành bốc thăm.</p>
-        </div>
     </div>
 </div>
 
 <script>
-// --- 1. CẤU HÌNH FIREBASE (Thay bằng của bạn) ---
+// --- CONFIG FIREBASE ---
 const firebaseConfig = {
-  apiKey: "AIzaSyBhN3Riezh-Ka20Salm1COtFbW9UdCLRdM",
-  authDomain: "seungrichampionship-90984.firebaseapp.com",
-  databaseURL: "https://seungrichampionship-90984-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "seungrichampionship-90984",
-  storageBucket: "seungrichampionship-90984.firebasestorage.app",
-  messagingSenderId: "1031691130771",
-  appId: "1:1031691130771:web:1dc2ade7290b60f9d87a66",
-  measurementId: "G-QC40451RRY"
+    apiKey: "AIzaSyC00bfXhy9CaF7xVbVqTtcfJqDQfGBechw",
+    authDomain: "seungrichampionship-d3985.firebaseapp.com",
+    databaseURL: "https://seungrichampionship-d3985-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    projectId: "seungrichampionship-d3985",
+    storageBucket: "seungrichampionship-d3985.firebasestorage.app",
+    messagingSenderId: "696543159443",
+    appId: "1:696543159443:web:59f4c558600929f4ee1966"
 };
 
-// --- 2. DỮ LIỆU ĐIỀU LỆ 2026 ---
+// DỮ LIỆU ĐIỀU LỆ
 const CLASSES = {
-    Kyorugi: [
-        "Nam Dưới 11: -21kg", "Nam Dưới 11: -24kg", "Nam Dưới 11: -27kg", "Nam Dưới 11: -30kg", "Nam Dưới 11: -33kg", "Nam Dưới 11: -36kg", "Nam Dưới 11: -39kg", "Nam Dưới 11: -42kg", "Nam Dưới 11: -45kg", "Nam Dưới 11: +45kg",
-        "Nữ Dưới 11: -21kg", "Nữ Dưới 11: -24kg", "Nữ Dưới 11: -27kg", "Nữ Dưới 11: -30kg", "Nữ Dưới 11: -33kg", "Nữ Dưới 11: -36kg", "Nữ Dưới 11: -39kg", "Nữ Dưới 11: -42kg", "Nữ Dưới 11: -45kg", "Nữ Dưới 11: +45kg",
-        "Nam 12-14: -33kg", "Nam 12-14: -37kg", "Nam 12-14: -41kg", "Nam 12-14: -45kg", "Nam 12-14: -49kg", "Nam 12-14: -53kg", "Nam 12-14: -57kg", "Nam 12-14: -61kg", "Nam 12-14: -65kg", "Nam 12-14: +65kg",
-        "Nữ 12-14: -29kg", "Nữ 12-14: -33kg", "Nữ 12-14: -37kg", "Nữ 12-14: -41kg", "Nữ 12-14: -44kg", "Nữ 12-14: -47kg", "Nữ 12-14: -51kg", "Nữ 12-14: -55kg", "Nữ 12-14: -59kg", "Nữ 12-14: +59kg"
-    ],
-    Poomsae: ["Cá nhân Nam Dưới 11", "Cá nhân Nữ Dưới 11", "Cá nhân Nam 12-14", "Cá nhân Nữ 12-14", "Cá nhân Nam 15-17", "Cá nhân Nữ 15-17", "Cá nhân Nam Trên 17", "Cá nhân Nữ Trên 17"],
-    Speed: ["Nam Dưới 11", "Nữ Dưới 11", "Nam 12-14", "Nữ 12-14", "Nam 15-17", "Nữ 15-17"]
+    Kyorugi: ["Nam Dưới 11: -21kg", "Nam Dưới 11: -24kg", "Nam Dưới 11: -27kg", "Nam Dưới 11: -30kg", "Nữ Dưới 11: -21kg", "Nam 12-14: -33kg", "Nam 12-14: -37kg"],
+    Poomsae: ["Cá nhân Nam Dưới 11", "Cá nhân Nữ Dưới 11", "Cá nhân Nam 12-14", "Cá nhân Nữ 12-14"],
+    Speed: ["Nam Dưới 11", "Nữ Dưới 11", "Nam 12-14"]
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+let currentClub = "";
 
-// --- 3. LOGIC XỬ LÝ ---
-function handleSTT() {
-    const lines = document.getElementById('namesInput').value.split('\n');
-    document.getElementById('lineNumbers').innerHTML = Array.from({length: Math.max(lines.length, 1)}, (_, i) => i + 1).join('<br>');
+// 1. Xử lý Đăng nhập / Đăng ký tự động
+function handleAccess() {
+    const club = document.getElementById('loginClub').value.trim();
+    const code = document.getElementById('loginCode').value.trim();
+    if(!club || !code) return alert("Vui lòng nhập Tên đơn vị và Mã bảo mật!");
+
+    const clubRef = db.ref('club_accounts/' + club);
+    clubRef.once('value', snap => {
+        if(snap.exists()) {
+            // Nếu đã có tên CLB -> Kiểm tra mã
+            if(snap.val().code === code) {
+                enterPortal(club);
+            } else {
+                alert("Mã bảo mật không đúng cho Đơn vị này!");
+            }
+        } else {
+            // Nếu chưa có -> Tự động đăng ký mới
+            if(confirm(`Đơn vị "${club}" chưa có trên hệ thống. Bạn muốn tạo mới với mã bảo mật này?`)) {
+                clubRef.set({ code: code, createdAt: new Date().getTime() }).then(() => enterPortal(club));
+            }
+        }
+    });
+}
+
+function enterPortal(club) {
+    currentClub = club;
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('section-reg').classList.remove('hidden');
+    document.getElementById('clubTag').innerText = club;
+    document.getElementById('clubTitle')?.innerText = club;
+    loadMyAthletes();
+    loadCategories();
+}
+
+// 2. Lưu/Sửa VĐV
+async function saveVdv() {
+    const name = document.getElementById('vdvName').value.trim();
+    const cat = document.getElementById('mainType').value;
+    const sub = document.getElementById('subType').value;
+    const key = document.getElementById('editKey').value;
+
+    if(!name) return alert("Nhập tên VĐV!");
+
+    const vdvData = { name, club: currentClub, category: cat, subType: sub, isLocked: false, updatedAt: new Date().getTime() };
+
+    if(key) {
+        await db.ref('registrations_2026/' + key).update(vdvData);
+        alert("Đã cập nhật!");
+    } else {
+        await db.ref('registrations_2026').push(vdvData);
+        alert("Đã thêm mới!");
+    }
+    resetForm();
+}
+
+function loadMyAthletes() {
+    db.ref('registrations_2026').on('value', snap => {
+        const data = snap.val();
+        const container = document.getElementById('myAthletes');
+        container.innerHTML = "";
+        if(!data) return;
+
+        Object.keys(data).forEach(key => {
+            const r = data[key];
+            if(r.club === currentClub) {
+                container.innerHTML += `
+                    <div class="p-4 bg-white border border-slate-100 rounded-2xl flex justify-between items-center shadow-sm">
+                        <div class="flex flex-col">
+                            <span class="font-black text-slate-900 uppercase text-sm">${r.name}</span>
+                            <span class="text-slate-400 font-bold text-[9px] uppercase mt-0.5 tracking-wider">${r.category} - ${r.subType}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            ${r.isLocked ? 
+                                '<span class="text-[9px] font-black text-red-500 bg-red-50 px-3 py-1.5 rounded-xl border border-red-100">BỊ KHÓA</span>' : 
+                                `<button onclick="editVdv('${key}')" class="bg-amber-50 text-amber-600 p-2.5 rounded-xl hover:bg-amber-600 hover:text-white transition shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+                                 <button onclick="deleteVdv('${key}')" class="bg-red-50 text-red-500 p-2.5 rounded-xl hover:bg-red-500 hover:text-white transition shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>`
+                            }
+                        </div>
+                    </div>`;
+            }
+        });
+    });
+}
+
+function deleteVdv(key) {
+    if(confirm("Bạn có chắc chắn muốn xóa VĐV này?")) {
+        db.ref('registrations_2026/' + key).remove();
+    }
+}
+
+function editVdv(key) {
+    db.ref('registrations_2026/' + key).once('value', snap => {
+        const v = snap.val();
+        document.getElementById('vdvName').value = v.name;
+        document.getElementById('mainType').value = v.category;
+        updateSubTypes();
+        document.getElementById('subType').value = v.subType;
+        document.getElementById('editKey').value = key;
+        document.getElementById('formTitle').innerText = "Chỉnh sửa VĐV";
+        document.getElementById('saveBtn').innerText = "Cập nhật";
+        document.getElementById('cancelBtn').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// 3. Kết quả tổng hợp
+function loadCategories() {
+    db.ref('registrations_2026').on('value', snap => {
+        const data = snap.val();
+        const grid = document.getElementById('categoryGrid');
+        grid.innerHTML = "";
+        if(!data) return;
+
+        const counts = {};
+        Object.values(data).forEach(r => {
+            const key = `${r.category} - ${r.subType}`;
+            counts[key] = (counts[key] || 0) + 1;
+        });
+
+        Object.keys(counts).sort().forEach(cat => {
+            grid.innerHTML += `
+                <div class="p-5 bg-white border border-slate-200 rounded-3xl flex justify-between items-center shadow-sm">
+                    <span class="font-black text-[11px] uppercase text-slate-600">${cat}</span>
+                    <span class="bg-slate-100 text-blue-600 text-[10px] font-black px-3 py-1 rounded-full">${counts[cat]} VĐV</span>
+                </div>`;
+        });
+    });
+}
+
+function resetForm() {
+    document.getElementById('vdvName').value = "";
+    document.getElementById('editKey').value = "";
+    document.getElementById('formTitle').innerText = "Đăng ký VĐV";
+    document.getElementById('saveBtn').innerText = "Lưu thông tin";
+    document.getElementById('cancelBtn').classList.add('hidden');
 }
 
 function updateSubTypes() {
@@ -143,67 +276,11 @@ function updateSubTypes() {
 function switchTab(tab) {
     document.getElementById('section-reg').classList.toggle('hidden', tab !== 'reg');
     document.getElementById('section-view').classList.toggle('hidden', tab !== 'view');
-    document.getElementById('btn-reg').className = `tab-btn flex-1 px-8 py-3 rounded-xl transition-all ${tab==='reg'?'nav-active':'text-slate-400'}`;
-    document.getElementById('btn-view').className = `tab-btn flex-1 px-8 py-3 rounded-xl transition-all ${tab==='view'?'nav-active':'text-slate-400'}`;
+    document.getElementById('btn-reg').className = `tab-btn flex-1 px-8 py-3 rounded-xl transition-all font-black text-[10px] uppercase ${tab==='reg'?'nav-active':'text-slate-400'}`;
+    document.getElementById('btn-view').className = `tab-btn flex-1 px-8 py-3 rounded-xl transition-all font-black text-[10px] uppercase ${tab==='view'?'nav-active':'text-slate-400'}`;
 }
 
-async function sendReg() {
-    const club = document.getElementById('clubName').value.trim();
-    const names = document.getElementById('namesInput').value.split('\n').filter(n => n.trim());
-    const cat = document.getElementById('mainType').value;
-    const sub = document.getElementById('subType').value;
-
-    if(!club || names.length === 0) return alert("Vui lòng nhập Tên Đơn vị và Danh sách VĐV!");
-
-    const btn = document.getElementById('sendBtn');
-    btn.disabled = true; btn.innerText = "ĐANG GỬI...";
-
-    try {
-        for(let name of names) {
-            await db.ref('registrations_2026').push({
-                name: name.trim(),
-                club: club,
-                category: cat,
-                subType: sub,
-                time: new Date().getTime()
-            });
-        }
-        document.getElementById('namesInput').value = "";
-        handleSTT();
-        alert("Đăng ký thành công cho " + names.length + " VĐV!");
-    } catch (e) { alert("Lỗi kết nối!"); }
-    finally { btn.disabled = false; btn.innerText = "GỬI ĐĂNG KÝ / SUBMIT DATA"; }
-}
-
-// Lắng nghe dữ liệu
-db.ref('registrations_2026').on('value', snap => {
-    const data = snap.val();
-    const container = document.getElementById('displayRegs');
-    document.getElementById('statusDB').innerText = "● ONLINE";
-    document.getElementById('statusDB').className = "text-[10px] font-black uppercase px-3 py-1 rounded-full bg-green-100 text-green-600";
-    
-    if(!data) { container.innerHTML = "<p class='text-center text-slate-400 mt-10 font-medium'>Chưa có dữ liệu đăng ký.</p>"; return; }
-    
-    const list = Object.values(data).reverse();
-    document.getElementById('regCount').innerText = `(${list.length})`;
-    
-    container.innerHTML = list.map(r => `
-        <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex justify-between items-center hover:shadow-md transition-all group">
-            <div class="flex flex-col">
-                <span class="font-black text-slate-900 uppercase text-sm">${r.name}</span>
-                <span class="text-blue-600 font-bold text-[10px] uppercase mt-0.5">${r.club}</span>
-            </div>
-            <div class="text-right">
-                <div class="bg-white border px-2 py-1 rounded-lg text-[9px] font-black text-slate-500 uppercase inline-block">${r.category}</div>
-                <div class="text-[10px] font-bold text-slate-400 mt-1 italic">${r.subType}</div>
-            </div>
-        </div>
-    `).join('');
-});
-
-// Chạy lần đầu
 updateSubTypes();
-handleSTT();
 </script>
 </body>
 </html>
