@@ -12,9 +12,8 @@
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1e293b; }
         .card { background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .nav-active { background: #2563eb !important; color: white !important; shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
-        input, select, textarea { border: 2px solid #e2e8f0 !important; border-radius: 10px !important; padding: 10px !important; outline: none !important; transition: 0.2s; font-size: 14px; }
+        input, select, textarea { border: 2px solid #e2e8f0 !important; border-radius: 10px !important; padding: 10px !important; outline: none !important; transition: 0.2s; font-size: 14px; width: 100%; }
         input:focus { border-color: #2563eb !important; }
-        /* Bracket Style */
         .bracket-scroll { display: flex; gap: 40px; padding: 20px; overflow-x: auto; min-height: 400px; }
         .round-column { display: flex; flex-direction: column; justify-content: space-around; min-width: 220px; }
         .match-box { border-left: 4px solid #cbd5e1; padding-left: 10px; margin: 15px 0; background: #f8fafc; border-radius: 0 8px 8px 0; min-height: 80px; display: flex; flex-direction: column; justify-content: center; position: relative; }
@@ -29,67 +28,63 @@
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[100] flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center">
             <h2 class="text-3xl font-black text-slate-900 uppercase italic mb-2">Club Login</h2>
-            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-8">Hệ thống đăng ký Seung Ri 2026</p>
-            <div class="space-y-4 text-left">
-                <input type="email" id="loginEmail" placeholder="Email đơn vị" class="w-full">
-                <input type="password" id="loginPass" placeholder="Mật khẩu" class="w-full">
-                <button onclick="handleLogin()" id="loginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-700 transition">Vào hệ thống</button>
+            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-8">Seung Ri Tournament 2026</p>
+            <div class="space-y-4">
+                <input type="email" id="loginEmail" placeholder="Email đơn vị">
+                <input type="password" id="loginPass" placeholder="Mật khẩu">
+                <button onclick="handleLogin()" id="loginBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-700 transition">Truy cập hệ thống</button>
             </div>
         </div>
     </div>
 
     <div id="mainUI" class="hidden">
         <header class="flex flex-col lg:flex-row justify-between items-center mb-8 gap-6 bg-white p-6 rounded-[2rem] border-b-4 border-blue-600">
-            <div class="flex items-center gap-4">
-                <h1 class="text-2xl font-black text-slate-900 italic uppercase">SEUNG RI <span class="text-blue-600">LIVE</span></h1>
-                <div id="userBadge" class="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full font-black text-[10px]">---</div>
-            </div>
+            <h1 class="text-2xl font-black text-slate-900 italic uppercase">SEUNG RI <span class="text-blue-600">LIVE</span></h1>
             <nav class="flex bg-slate-100 p-1.5 rounded-2xl">
                 <button onclick="switchTab('reg')" id="tab-reg" class="nav-active px-6 py-2.5 rounded-xl font-black text-[10px] uppercase transition">1. Đăng ký</button>
                 <button onclick="switchTab('list')" id="tab-list" class="px-6 py-2.5 rounded-xl font-black text-[10px] uppercase transition ml-2 text-slate-400">2. Danh sách</button>
-                <button onclick="switchTab('result')" id="tab-result" class="px-6 py-2.5 rounded-xl font-black text-[10px] uppercase transition ml-2 text-slate-400">3. Sơ đồ & Kết quả</button>
+                <button onclick="switchTab('result')" id="tab-result" class="px-6 py-2.5 rounded-xl font-black text-[10px] uppercase transition ml-2 text-slate-400">3. Kết quả</button>
             </nav>
         </header>
 
         <div id="sec-reg" class="space-y-6">
             <div class="card p-8 border-l-[10px] border-blue-600">
-                <h2 class="font-black uppercase italic mb-4">Nhập danh sách VĐV</h2>
-                <input type="text" id="clubName" placeholder="Tên đơn vị (VD: CLB Quận 1)" class="w-full md:w-1/3 mb-4">
-                <textarea id="listNames" rows="5" class="w-full mb-4" placeholder="Dán danh sách tên từ Excel..."></textarea>
-                <button onclick="processImport()" class="bg-slate-800 text-white px-8 py-3 rounded-xl font-black text-xs uppercase">Xác nhận tên</button>
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <input type="text" id="clubName" placeholder="Tên đơn vị (VD: CLB Seung Ri)">
+                </div>
+                <textarea id="listNames" rows="5" placeholder="Dán danh sách tên từ Excel (mỗi dòng 1 tên)..."></textarea>
+                <button onclick="processImport()" class="mt-4 bg-slate-800 text-white px-8 py-3 rounded-xl font-black text-xs uppercase">Xác nhận danh sách</button>
             </div>
 
-            <div id="step2" class="hidden card p-8 border-t-[10px] border-amber-500">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left mb-6">
-                        <thead><tr class="text-[10px] uppercase font-black text-slate-400 border-b">
-                            <th class="p-3">Họ và Tên</th><th class="p-3">Nội dung</th><th class="p-3">Hạng cân / Tuổi</th><th class="p-3 text-center">Xóa</th>
-                        </tr></thead>
-                        <tbody id="tempBody" class="divide-y"></tbody>
-                    </table>
-                </div>
-                <button onclick="finalSave()" id="saveBtn" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-sm uppercase shadow-xl">Lưu chính thức</button>
+            <div id="step2" class="hidden card p-8 border-t-[10px] border-amber-500 overflow-x-auto">
+                <table class="w-full text-left mb-6 min-w-[600px]">
+                    <thead><tr class="text-[10px] uppercase font-black text-slate-400 border-b">
+                        <th class="p-3">Họ và Tên</th><th class="p-3">Nội dung chính</th><th class="p-3">Phân loại / Nhóm tuổi</th><th class="p-3 text-center">Xóa</th>
+                    </tr></thead>
+                    <tbody id="tempBody" class="divide-y"></tbody>
+                </table>
+                <button onclick="finalSave()" id="saveBtn" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-sm uppercase shadow-xl">Lưu dữ liệu chính thức</button>
             </div>
         </div>
 
-        <div id="sec-list" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div id="sec-list" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="card p-6 border-t-8 border-red-500">
-                <h3 class="font-black text-xs uppercase mb-4 text-red-500">Đối kháng (Kyorugi)</h3>
+                <h3 class="font-black text-xs uppercase mb-4 text-red-500">Đối kháng</h3>
                 <div id="list-Kyorugi" class="space-y-2"></div>
             </div>
             <div class="card p-6 border-t-8 border-blue-500">
-                <h3 class="font-black text-xs uppercase mb-4 text-blue-500">Quyền (Poomsae)</h3>
+                <h3 class="font-black text-xs uppercase mb-4 text-blue-500">Quyền (Cá nhân/Đôi/Đội)</h3>
                 <div id="list-Poomsae" class="space-y-2"></div>
             </div>
             <div class="card p-6 border-t-8 border-emerald-500">
-                <h3 class="font-black text-xs uppercase mb-4 text-emerald-500">Tốc độ (Speed)</h3>
+                <h3 class="font-black text-xs uppercase mb-4 text-emerald-500">Tốc độ</h3>
                 <div id="list-Speed" class="space-y-2"></div>
             </div>
         </div>
 
         <div id="sec-result" class="hidden space-y-6">
             <div class="card p-6">
-                <select id="resSelect" onchange="renderResultBracket()" class="w-full md:w-1/3"></select>
+                <select id="resSelect" onchange="renderResultBracket()" class="max-w-md"></select>
                 <div id="resContainer" class="bracket-scroll bg-slate-50 rounded-2xl mt-6"></div>
             </div>
         </div>
@@ -97,7 +92,6 @@
 </div>
 
 <script>
-// --- CẤU HÌNH ---
 const firebaseConfig = {
     apiKey: "AIzaSyBhN3Riezh-Ka20Salm1COtFbW9UdCLRdM",
     authDomain: "seungrichampionship-90984.firebaseapp.com",
@@ -109,31 +103,30 @@ const firebaseConfig = {
 };
 
 const CLASSES = {
-    Kyorugi: ["Nam Dưới 11: -21kg", "Nam Dưới 11: -24kg", "Nam Dưới 11: -27kg", "Nữ Dưới 11: -21kg"],
-    Poomsae: ["Cá nhân Nam Dưới 11", "Cá nhân Nữ Dưới 11"],
-    Speed: ["Nam Dưới 11", "Nữ Dưới 11"]
+    "Kyorugi": ["Nam Dưới 11: -21kg", "Nam Dưới 11: -24kg", "Nam Dưới 11: -27kg", "Nữ Dưới 11: -21kg"],
+    "Quyền Cá Nhân Nam": ["Nhóm 1: Dưới 8 tuổi", "Nhóm 2: 9-10 tuổi", "Nhóm 3: 11-12 tuổi", "Nhóm 4: 13-14 tuổi", "Nhóm 5: 15-17 tuổi", "Nhóm 6: 18-30 tuổi", "Nhóm 7: 31-40 tuổi", "Nhóm 8: Trên 41 tuổi"],
+    "Quyền Cá Nhân Nữ": ["Nhóm 1: Dưới 8 tuổi", "Nhóm 2: 9-10 tuổi", "Nhóm 3: 11-12 tuổi", "Nhóm 4: 13-14 tuổi", "Nhóm 5: 15-17 tuổi", "Nhóm 6: 18-30 tuổi", "Nhóm 7: 31-40 tuổi", "Nhóm 8: Trên 41 tuổi"],
+    "Quyền Đôi/Đồng Đội": ["Dưới 10 tuổi (2016+)", "11-14 tuổi (2015-2012)", "15-30 tuổi (2011-1996)", "Trên 31 tuổi (1995-)"],
+    "Speed": ["Nam Dưới 11", "Nữ Dưới 11"]
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const root = "tournament_2026"; // Nhánh đồng nhất
+const root = "tournament_2026";
 
 let currentUser = "";
 let tempVdv = [];
 let allBrackets = {};
 
-// --- LOGIC ĐĂNG NHẬP ---
 function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const pass = document.getElementById('loginPass').value.trim();
-    if(!email || !pass) return alert("Nhập đủ Email và Pass");
-    
-    const emailKey = email.replace(/\./g, ',');
-    db.ref(`${root}/users/${emailKey}`).once('value', snap => {
-        if(snap.exists() && snap.val().pass === pass) startApp(email);
-        else if(!snap.exists() && confirm("Email mới, tạo tài khoản?")) {
-            db.ref(`${root}/users/${emailKey}`).set({pass}).then(() => startApp(email));
-        } else alert("Sai mật khẩu!");
+    if(!email || !pass) return alert("Nhập đủ thông tin!");
+    const key = email.replace(/\./g, ',');
+    db.ref(`${root}/users/${key}`).once('value', s => {
+        if(s.exists() && s.val().pass === pass) startApp(email);
+        else if(!s.exists() && confirm("Email mới, tạo tài khoản?")) db.ref(`${root}/users/${key}`).set({pass}).then(() => startApp(email));
+        else alert("Sai mật khẩu!");
     });
 }
 
@@ -141,20 +134,13 @@ function startApp(email) {
     currentUser = email;
     document.getElementById('loginOverlay').style.display = 'none';
     document.getElementById('mainUI').classList.remove('hidden');
-    document.getElementById('userBadge').innerText = email;
-    
-    // Tự điền tên CLB cũ
-    db.ref(`${root}/last_club/${email.replace(/\./g,',')}`).once('value', s => {
-        if(s.exists()) document.getElementById('clubName').value = s.val();
-    });
-
+    db.ref(`${root}/last_club/${email.replace(/\./g,',')}`).once('value', s => { if(s.exists()) document.getElementById('clubName').value = s.val(); });
     listenData();
 }
 
-// --- ĐĂNG KÝ VĐV ---
 function processImport() {
     const raw = document.getElementById('listNames').value.split('\n').filter(n => n.trim());
-    if(raw.length === 0) return alert("Dán tên trước!");
+    if(raw.length === 0) return alert("Dán danh sách trước!");
     tempVdv = raw.map(n => ({ name: n.trim().toUpperCase(), category: 'Kyorugi', subType: CLASSES.Kyorugi[0] }));
     renderTemp();
 }
@@ -163,62 +149,59 @@ function renderTemp() {
     document.getElementById('step2').classList.remove('hidden');
     document.getElementById('tempBody').innerHTML = tempVdv.map((v, i) => `
         <tr>
-            <td class="p-3 font-bold">${v.name}</td>
-            <td class="p-3"><select onchange="updateV(${i}, 'category', this.value)" class="w-full"><option value="Kyorugi">Đối kháng</option><option value="Poomsae">Quyền</option><option value="Speed">Tốc độ</option></select></td>
-            <td class="p-3"><select onchange="updateV(${i}, 'subType', this.value)" class="w-full">${CLASSES[v.category].map(c => `<option value="${c}">${c}</option>`).join('')}</select></td>
+            <td class="p-3 font-bold uppercase text-xs">${v.name}</td>
+            <td class="p-3"><select onchange="updateV(${i}, 'category', this.value)">
+                ${Object.keys(CLASSES).map(cat => `<option value="${cat}" ${v.category===cat?'selected':''}>${cat}</option>`).join('')}
+            </select></td>
+            <td class="p-3"><select onchange="updateV(${i}, 'subType', this.value)">
+                ${CLASSES[v.category].map(c => `<option value="${c}" ${v.subType===c?'selected':''}>${c}</option>`).join('')}
+            </select></td>
             <td class="p-3 text-center"><button onclick="tempVdv.splice(${i},1);renderTemp()" class="text-red-500">✕</button></td>
-        </tr>
-    `).join('');
+        </tr>`).join('');
 }
 
-function updateV(idx, field, val) {
-    tempVdv[idx][field] = val;
-    if(field === 'category') tempVdv[idx].subType = CLASSES[val][0];
-    renderTemp();
+function updateV(i, f, v) { 
+    tempVdv[i][f] = v; 
+    if(f === 'category') tempVdv[i].subType = CLASSES[v][0];
+    renderTemp(); 
 }
 
 async function finalSave() {
     const club = document.getElementById('clubName').value.trim();
-    if(!club) return alert("Nhập tên CLB");
+    if(!club) return alert("Nhập tên CLB!");
     document.getElementById('saveBtn').disabled = true;
-    for(let v of tempVdv) {
-        await db.ref(`${root}/registrations`).push({...v, club, ownerEmail: currentUser, time: Date.now()});
-    }
+    for(let v of tempVdv) await db.ref(`${root}/registrations`).push({...v, club, ownerEmail: currentUser, isLocked: false});
     db.ref(`${root}/last_club/${currentUser.replace(/\./g,',')}`).set(club);
-    alert("Thành công!");
-    location.reload();
+    alert("Đã lưu!"); location.reload();
 }
 
-// --- LẮNG NGHE & HIỂN THỊ ---
 function listenData() {
-    // 1. Danh sách VĐV của đơn vị
     db.ref(`${root}/registrations`).on('value', snap => {
         const data = snap.val() || {};
         ['Kyorugi', 'Poomsae', 'Speed'].forEach(c => document.getElementById('list-'+c).innerHTML = "");
-        Object.keys(data).forEach(key => {
-            const v = data[key];
+        Object.keys(data).forEach(k => {
+            const v = data[k];
             if(v.ownerEmail === currentUser) {
+                const target = v.category.includes('Quyền') ? 'Poomsae' : v.category;
                 const div = document.createElement('div');
-                div.className = "p-3 border rounded-xl flex justify-between items-center bg-white";
-                div.innerHTML = `<div><div class="font-black text-xs uppercase">${v.name}</div><div class="text-[9px] opacity-50 font-bold">${v.subType}</div></div>`;
+                div.className = "p-3 border rounded-xl flex justify-between items-center bg-slate-50";
+                div.innerHTML = `<div><div class="font-black text-xs uppercase">${v.name}</div><div class="text-[9px] opacity-50 font-bold">${v.category}: ${v.subType}</div></div>`;
                 if(!v.isLocked) {
-                    const btn = document.createElement('button');
-                    btn.innerText = "✕"; btn.className = "text-red-300 hover:text-red-600";
-                    btn.onclick = () => { if(confirm("Xóa?")) db.ref(`${root}/registrations/${key}`).remove(); };
+                    const btn = document.createElement('button'); btn.innerText = "✕"; btn.className = "text-red-300 hover:text-red-600";
+                    btn.onclick = () => { if(confirm("Xóa?")) db.ref(`${root}/registrations/${k}`).remove(); };
                     div.appendChild(btn);
                 }
-                document.getElementById('list-'+v.category).appendChild(div);
+                document.getElementById('list-'+target).appendChild(div);
             }
         });
     });
 
-    // 2. Sơ đồ kết quả
     db.ref(`${root}/brackets`).on('value', snap => {
         allBrackets = snap.val() || {};
         const sel = document.getElementById('resSelect');
-        const oldVal = sel.value;
+        const old = sel.value;
         sel.innerHTML = Object.keys(allBrackets).map(k => `<option value="${k}">${k}</option>`).join('');
-        if(oldVal && allBrackets[oldVal]) sel.value = oldVal;
+        if(old && allBrackets[old]) sel.value = old;
         renderResultBracket();
     });
 }
@@ -226,34 +209,27 @@ function listenData() {
 function renderResultBracket() {
     const cat = document.getElementById('resSelect').value;
     const area = document.getElementById('resContainer');
-    if(!cat || !allBrackets[cat]) return area.innerHTML = "<p class='p-10 text-center opacity-30'>Chưa bốc thăm</p>";
-    
+    if(!cat || !allBrackets[cat]) return area.innerHTML = "<p class='p-10 text-center opacity-30'>Chưa có dữ liệu</p>";
     const b = allBrackets[cat];
     if(b.type === 'Speed') {
-        let html = `<div class='p-6'><table class='w-full text-left font-bold text-sm'>`;
+        let h = `<div class='p-6'><table class='w-full text-sm'>`;
         b.groups.forEach(g => {
-            html += `<tr class='text-blue-600'><td colspan='3' class='p-2'>NHÓM ${g.groupId}</td></tr>`;
-            g.players.forEach(p => html += `<tr class='border-b'><td>${p.name}</td><td>${p.club}</td><td>${p.score || 0} lần</td><td>${p.rank || '-'}</td></tr>`);
+            h += `<tr class='text-blue-600'><td colspan='4' class='p-2 font-black'>NHÓM ${g.groupId}</td></tr>`;
+            g.players.forEach(p => h += `<tr class='border-b'><td>${p.name}</td><td>${p.club}</td><td>${p.score}</td><td>${p.rank||'-'}</td></tr>`);
         });
-        area.innerHTML = html + "</table></div>";
+        area.innerHTML = h + "</table></div>";
     } else if(b.type === 'PoomsaeGroup') {
-        area.innerHTML = b.groups.map(g => `
-            <div class='p-6 border-b'>
-                <div class='text-blue-600 font-black mb-4'>NHÓM ${g.groupId}</div>
-                <div class='flex gap-10'>${g.rounds.map(r => `<div class='round-column'>${r.map(m => renderMatchHTML(m)).join('')}</div>`).join('')}</div>
-            </div>
-        `).join('');
+        area.innerHTML = b.groups.map(g => `<div class='p-6 border-b'><div class='text-blue-600 font-black mb-4 uppercase'>NHÓM ${g.groupId}</div><div class='flex gap-10'>${g.rounds.map(r => `<div class='round-column'>${r.map(m => renderMatchHTML(m)).join('')}</div>`).join('')}</div></div>`).join('');
     } else {
         area.innerHTML = `<div class='bracket-scroll'>${b.rounds.map(r => `<div class='round-column'>${r.map(m => renderMatchHTML(m)).join('')}</div>`).join('')}</div>`;
     }
 }
 
 function renderMatchHTML(m) {
-    return `<div class="match-box">
-        <span class="match-no">(${m.matchNo || ''})</span>
-        <div class="player-line ${m.winner?.name === m.p1.name ? 'is-winner' : ''}"><span>${m.p1.name}</span><small>${m.score || ''}</small></div>
-        <div class="player-line ${m.winner?.name === m.p2.name ? 'is-winner' : ''}"><span>${m.p2.name}</span><small>${m.score || ''}</small></div>
-    </div>`;
+    const w1 = m.winner?.name === m.p1.name; const w2 = m.winner?.name === m.p2.name;
+    return `<div class="match-box"><span class="match-no">${m.matchNo || ''}</span>
+        <div class="player-line ${w1?'is-winner':''}"><span>${m.p1.name}</span><small>${m.score||''}</small></div>
+        <div class="player-line ${w2?'is-winner':''}"><span>${m.p2.name}</span><small>${m.score||''}</small></div></div>`;
 }
 
 function switchTab(t) {
