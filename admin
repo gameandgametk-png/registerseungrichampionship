@@ -1,1 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEUNG RI 2026 - ADMIN PANEL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
+        .card-admin { background: #1e293b; border: 1px solid #334155; border-radius: 20px; }
+        input, select { background: #334155 !important; border: 1px solid #475569 !important; color: white !important; border-radius: 10px; padding: 8px 12px; outline: none; }
+        .tab-btn.active { background: #2563eb; color: white; }
+        .status-online { color: #10b981; }
+        tr:hover { background: #1e293b; }
+    </style>
+</head>
+<body>
 
+<div id="adminLogin" class="fixed inset-0 bg-slate-950 z-[200] flex items-center justify-center p-4">
+    <div class="card-admin p-8 max-w-md w-full text-center">
+        <h2 class="text-2xl font-black uppercase italic mb-6 text-blue-500">Admin Control</h2>
+        <input type="password" id="adminPass" placeholder="Nhập mã quản trị" class="w-full mb-4 py-4 text-center text-xl">
+        <button onclick="checkAdmin()" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase">Đăng nhập hệ thống</button>
+    </div>
+</div>
+
+<div class="max-w-[1800px] mx-auto p-4 md:p-6">
+    <header class="flex flex-col lg:flex-row justify-between items-center mb-8 gap-6 bg-[#1e293b] p-6 rounded-3xl border-b-4 border-blue-600">
+        <div class="flex items-center gap-4">
+            <h1 class="text-2xl font-black uppercase italic">SEUNG RI <span class="text-blue-500">ADMIN</span></h1>
+            <div id="dbStatus" class="text-[10px] font-bold uppercase opacity-50 italic">● Connecting...</div>
+        </div>
+        <nav class="flex bg-slate-800 p-1.5 rounded-2xl">
+            <button onclick="showSection('users')" class="tab-btn active px-6 py-2 rounded-xl text-[10px] font-black uppercase">Tài khoản Đoàn</button>
+            <button onclick="showSection('athletes')" class="tab-btn px-6 py-2 rounded-xl text-[10px] font-black uppercase ml-2">Quản lý VĐV</button>
+            <button onclick="showSection('draw')" class="tab-btn px-6 py-2 rounded-xl text-[10px] font-black uppercase ml-2 bg-red-600/20 text-red-400">Bốc thăm / Draw</button>
+        </nav>
+    </header>
+
+    <div id="sec-users" class="space-y-6">
+        <div class="card-admin p-6">
+            <h2 class="text-lg font-black uppercase italic mb-4">Danh sách các đoàn đã đăng ký tài khoản</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="text-[10px] uppercase text-slate-500 border-b border-slate-700">
+                        <tr>
+                            <th class="p-4">Email Đăng nhập</th>
+                            <th class="p-4">Mật khẩu (Code)</th>
+                            <th class="p-4">Đơn vị gần nhất</th>
+                            <th class="p-4 text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable" class="text-sm font-semibold"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-athletes" class="hidden space-y-6">
+        <div class="flex flex-wrap gap-4 mb-4">
+            <select id="filterCat" onchange="loadAthletes()" class="w-48"><option value="all">Tất cả nội dung</option><option value="Kyorugi">Đối kháng</option><option value="Poomsae">Quyền</option><option value="Speed">Tốc độ</option></select>
+            <button onclick="lockAll(true)" class="bg-red-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Khóa sửa toàn bộ</button>
+            <button onclick="lockAll(false)" class="bg-green-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Mở sửa toàn bộ</button>
+        </div>
+        <div class="card-admin p-6 overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="text-[10px] uppercase text-slate-500 border-b border-slate-700">
+                    <tr>
+                        <th class="p-4">Họ và Tên</th>
+                        <th class="p-4">Đơn vị</th>
+                        <th class="p-4">Nội dung</th>
+                        <th class="p-4">Hạng cân</th>
+                        <th class="p-4 text-center">Trạng thái</th>
+                        <th class="p-4 text-center">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody id="athleteTable" class="text-sm"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="sec-draw" class="hidden card-admin p-8">
+        <div class="max-w-2xl mx-auto text-center">
+            <h2 class="text-3xl font-black uppercase italic mb-4">Tiến hành bốc thăm</h2>
+            <p class="text-slate-400 mb-8">Hệ thống sẽ lấy toàn bộ VĐV đã được khóa để tiến hành chia cặp ngẫu nhiên theo đúng hạng cân điều lệ.</p>
+            <div class="grid gap-4">
+                <button onclick="generateAllBrackets()" class="bg-blue-600 py-6 rounded-3xl font-black text-xl uppercase shadow-2xl shadow-blue-900/20 hover:scale-105 transition">Bắt đầu bốc thăm toàn giải</button>
+                <p class="text-[10px] text-red-400 font-bold uppercase italic">* Lưu ý: Chỉ bốc thăm khi đã hết hạn đăng ký và khóa dữ liệu.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- CONFIG FIREBASE (Dùng chung với trang Register) ---
+const firebaseConfig = {
+  apiKey: "AIzaSyBhN3Riezh-Ka20Salm1COtFbW9UdCLRdM",
+  authDomain: "seungrichampionship-90984.firebaseapp.com",
+  databaseURL: "https://seungrichampionship-90984-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "seungrichampionship-90984",
+  storageBucket: "seungrichampionship-90984.firebasestorage.app",
+  messagingSenderId: "1031691130771",
+  appId: "1:1031691130771:web:1dc2ade7290b60f9d87a66",
+  measurementId: "G-QC40451RRY"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+function checkAdmin() {
+    if(document.getElementById('adminPass').value === "admin123") {
+        document.getElementById('adminLogin').classList.add('hidden');
+        loadUsers();
+        loadAthletes();
+    } else alert("Mã sai!");
+}
+
+function showSection(id) {
+    ['users', 'athletes', 'draw'].forEach(s => document.getElementById('sec-'+s).classList.add('hidden'));
+    document.getElementById('sec-'+id).classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// 1. Quản lý Users
+function loadUsers() {
+    db.ref('users_v3').on('value', snap => {
+        const table = document.getElementById('userTable');
+        table.innerHTML = "";
+        const data = snap.val();
+        if(!data) return;
+        Object.keys(data).forEach(key => {
+            const user = data[key];
+            const email = key.replace(/,/g, '.');
+            table.innerHTML += `<tr class="border-b border-slate-800">
+                <td class="p-4 text-blue-400 font-bold">${email}</td>
+                <td class="p-4 font-mono text-amber-500">${user.pass}</td>
+                <td class="p-4 italic opacity-70" id="club-${key}">...</td>
+                <td class="p-4 text-center"><button onclick="deleteUser('${key}')" class="text-red-500">Xóa tài khoản</button></td>
+            </tr>`;
+            db.ref('last_club_v3/' + key).once('value', s => { if(s.exists()) document.getElementById('club-'+key).innerText = s.val(); });
+        });
+    });
+}
+
+// 2. Quản lý VĐV
+function loadAthletes() {
+    const catFilter = document.getElementById('filterCat').value;
+    db.ref('registrations_v3').on('value', snap => {
+        const table = document.getElementById('athleteTable');
+        table.innerHTML = "";
+        const data = snap.val();
+        if(!data) return;
+        Object.keys(data).forEach(key => {
+            const r = data[key];
+            if(catFilter !== 'all' && r.category !== catFilter) return;
+            table.innerHTML += `<tr class="border-b border-slate-800 ${r.isLocked ? 'opacity-50' : ''}">
+                <td class="p-4 font-black uppercase text-xs">${r.name}</td>
+                <td class="p-4 text-blue-400 font-bold text-xs">${r.club}</td>
+                <td class="p-4 text-[10px] font-bold opacity-60">${r.category}</td>
+                <td class="p-4 text-[10px] font-bold">${r.subType}</td>
+                <td class="p-4 text-center">
+                    <button onclick="toggleLock('${key}', ${!r.isLocked})" class="px-3 py-1 rounded-lg text-[10px] font-black ${r.isLocked ? 'bg-red-500 text-white' : 'bg-slate-700 text-slate-400'}">
+                        ${r.isLocked ? 'LOCKED' : 'OPEN'}
+                    </button>
+                </td>
+                <td class="p-4 text-center"><button onclick="deleteAthlete('${key}')" class="text-red-500">✕</button></td>
+            </tr>`;
+        });
+    });
+}
+
+function toggleLock(key, status) { db.ref('registrations_v3/' + key).update({ isLocked: status }); }
+
+function lockAll(status) {
+    db.ref('registrations_v3').once('value', snap => {
+        const updates = {};
+        Object.keys(snap.val()).forEach(key => { updates[key + '/isLocked'] = status; });
+        db.ref('registrations_v3').update(updates);
+    });
+}
+
+function deleteAthlete(key) { if(confirm("Xóa VĐV?")) db.ref('registrations_v3/' + key).remove(); }
+function deleteUser(key) { if(confirm("Xóa tài khoản này?")) db.ref('users_v3/' + key).remove(); }
+
+// 3. Logic Bốc thăm (Rất quan trọng)
+async function generateAllBrackets() {
+    if(!confirm("Xác nhận bốc thăm toàn giải? Mọi sơ đồ cũ sẽ bị ghi đè!")) return;
+    
+    db.ref('registrations_v3').once('value', snap => {
+        const data = snap.val();
+        if(!data) return alert("Không có dữ liệu!");
+
+        // 1. Nhóm VĐV theo hạng cân
+        const groups = {};
+        Object.values(data).forEach(r => {
+            const catKey = `${r.category} - ${r.subType}`;
+            if(!groups[catKey]) groups[catKey] = [];
+            groups[catKey].push(r);
+        });
+
+        // 2. Với mỗi nhóm, tạo sơ đồ bốc thăm ngẫu nhiên
+        Object.keys(groups).forEach(catName => {
+            const players = groups[catName].sort(() => Math.random() - 0.5);
+            // Logic tạo Bracket (Vòng 1, Vòng 2...) - Tôi sẽ viết chi tiết thuật toán này ở bước gộp sơ đồ
+            db.ref('brackets_v3/' + catName).set({
+                players: players,
+                updatedAt: Date.now()
+            });
+        });
+        alert("Đã tạo dữ liệu bốc thăm cho " + Object.keys(groups).length + " nội dung!");
+    });
+}
+
+db.ref('.info/connected').on('value', snap => {
+    const status = document.getElementById('dbStatus');
+    if (snap.val() === true) { status.innerText = "● Database Online"; status.className = "text-[10px] font-bold uppercase text-green-500 italic"; }
+});
+</script>
+</body>
+</html>
